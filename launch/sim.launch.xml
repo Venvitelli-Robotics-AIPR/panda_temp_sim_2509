@@ -1,0 +1,8 @@
+<launch>
+
+    <include file="$(find-pkg-share uclv_aipr_panda_sim)/launch/demo.launch.py"/>
+
+    <!-- EXTRA NODES -->
+    <node name="temp_sensor_sim" pkg="panda_temp_sim_2509" exec="temp_sensor_sim" output="screen" />
+
+</launch>

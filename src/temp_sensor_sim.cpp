@@ -1,7 +1,7 @@
 /*
     temp_sensor_sim node
 
-    Copyright 2022 Università degli studi della Campania "Luigi Vanvitelli"
+    Copyright 2022-2025 Università degli studi della Campania "Luigi Vanvitelli"
     Author: Marco Costanzo <marco.costanzo@unicampania.it>
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,21 +15,21 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 #include <cmath>
-#include <sensor_msgs/Temperature.h>
+#include <sensor_msgs/msg/temperature.hpp>
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "temp_sensor_sim");
+  rclcpp::init(argc, argv);
 
-  ros::NodeHandle nh;
+  rclcpp::Node::SharedPtr nh = std::make_shared<rclcpp::Node>("temp_sensor_sim");
 
-  ros::Publisher pub =
-      nh.advertise<sensor_msgs::Temperature>("/temperature", 1);
+  auto pub =
+      nh->create_publisher<sensor_msgs::msg::Temperature>("/temperature", 1);
 
-  ros::Rate loop_rate(1000);
-  ros::Time t0 = ros::Time::now();
+  rclcpp::Rate loop_rate(1000);
+  rclcpp::Time t0 = nh->now();
 
   double N[] = {2, 0.5, 0.05};
   double w[] = {2 * M_PI / 0.02, 2 * M_PI / 0.005, 2 * M_PI / 0.002};
@@ -37,12 +37,12 @@ int main(int argc, char **argv) {
   double T[] = {30, 100, 150};
   double TEMP_INTERVAL = 10;
 
-  while (ros::ok()) {
+  while (rclcpp::ok()) {
 
     loop_rate.sleep();
-    ros::spinOnce();
+    // ros::spinOnce();
 
-    auto t = (ros::Time::now() - t0).toSec();
+    auto t = (nh->now() - t0).seconds();
 
     auto cycle_t = std::fmod(t, 3 * TEMP_INTERVAL);
 
@@ -57,14 +57,14 @@ int main(int argc, char **argv) {
       temp += T[2];
     }
 
-    sensor_msgs::Temperature temp_msg;
+    sensor_msgs::msg::Temperature temp_msg;
 
-    temp_msg.header.stamp = ros::Time::now();
+    temp_msg.header.stamp = nh->now();
     temp_msg.header.frame_id = "sensor";
 
     temp_msg.temperature = temp;
 
-    pub.publish(temp_msg);
+    pub->publish(temp_msg);
   }
 
   return 0;
